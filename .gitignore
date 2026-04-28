@@ -1,0 +1,25 @@
+# web-ext build output
+web-ext-artifacts/
+*.xpi
+*.zip
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# logs
+*.log
+npm-debug.log*
+
+# node (in case tooling is added later)
+node_modules/
+
+# test artifacts
+playwright-report/
+test-results/
+
+# agent artifacts
+.gemini_security/
