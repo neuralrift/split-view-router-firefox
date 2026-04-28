@@ -1,0 +1,38 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+body{font-family:system-ui;width:300px;padding:12px;margin:0;color:#1f2937;background:#fff}
+button{padding:6px 10px;margin:4px 2px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;font-size:12px}
+button.active{background:#0a84ff;color:#fff;border-color:#0a84ff}
+.toggle-row{display:flex;align-items:center;justify-content:flex-start;gap:12px;margin-bottom:8px;padding:6px 2px}
+.toggle-label{font-size:12px;font-weight:600}
+.toggle-control{display:inline-flex;align-items:center;gap:6px;margin:0;padding:0;border:0;background:none;cursor:pointer}
+.toggle-switch{position:relative;width:36px;height:20px;border-radius:999px;background:#cbd5e1;transition:background .15s ease}
+.toggle-switch::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .15s ease}
+.toggle-control.on .toggle-switch{background:#0a84ff}
+.toggle-control.on .toggle-switch::after{left:18px}
+.toggle-state{min-width:24px;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.04em}
+.toggle-control.on .toggle-state{color:#0a84ff}
+.toggle-control:focus-visible{outline:2px solid #0a84ff;outline-offset:2px;border-radius:999px}
+.paused{color:#e97800;font-style:italic}
+.pair{padding:6px;border-bottom:1px solid #eee;font-size:12px}
+.pair b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.small{color:#666;font-size:11px}
+h3{margin:0 0 8px;font-size:14px}
+</style></head>
+<body>
+<h3>Split View Router</h3>
+<div class="toggle-row">
+  <span class="toggle-label">Routing</span>
+  <button id="toggle" class="toggle-control on" type="button" role="switch" aria-checked="true" aria-label="Toggle routing">
+    <span class="toggle-switch" aria-hidden="true"></span>
+    <span class="toggle-state">On</span>
+  </button>
+</div>
+<div>
+  <button id="ctrl" aria-pressed="false">Ctrl mode</button>
+  <button id="simple" aria-pressed="true">Simple mode</button>
+  <button id="clear">Clear all</button>
+</div>
+<div id="list" style="margin-top:8px;max-height:200px;overflow:auto"></div>
+<script src="popup.js"></script>
+</body></html>
