@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Split View Router — Diagnostics</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; color: #1f2937; background: #fff; font-size: 13px; }
+  h2 { margin: 0 0 4px; font-size: 16px; }
+  h3 { margin: 16px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; }
+  p.lede { margin: 0 0 14px; color: #475569; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+  button { padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; cursor: pointer; font-size: 12px; font-weight: 500; }
+  button:hover { background: #f1f5f9; }
+  button.primary { background: #0a84ff; color: #fff; border-color: #0a84ff; }
+  button.primary:hover { background: #0671dc; }
+  .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; background: #f1f5f9; color: #475569; }
+  .pill.on { background: #dbeafe; color: #1e40af; }
+  .pill.warn { background: #fef3c7; color: #92400e; }
+  .pill.err { background: #fee2e2; color: #991b1b; }
+  .state { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; }
+  .state .kv { display: flex; gap: 6px; padding: 2px 0; }
+  .state .kv b { min-width: 80px; color: #475569; font-weight: 600; }
+  .pair { padding: 4px 0; border-top: 1px dashed #e2e8f0; font-size: 12px; }
+  .pair:first-child { border-top: 0; }
+  .pair-title { font-weight: 600; }
+  .pair-meta { color: #64748b; font-size: 11px; }
+  .log { background: #0f172a; color: #e2e8f0; border-radius: 6px; padding: 8px 10px; font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 11px; max-height: 280px; overflow: auto; line-height: 1.5; }
+  .log .row-log { white-space: pre-wrap; word-break: break-word; }
+  .log .ts { color: #94a3b8; }
+  .log .src { color: #38bdf8; }
+  .log .lvl-info { color: #34d399; }
+  .log .lvl-warn { color: #fbbf24; }
+  .log .lvl-err { color: #f87171; }
+  .log .empty { color: #94a3b8; font-style: italic; }
+  .notice { background: #fef3c7; border-left: 3px solid #f59e0b; padding: 8px 10px; border-radius: 4px; color: #92400e; font-size: 12px; margin: 8px 0; }
+  .toast { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); background: #0f172a; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 12px; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<h2>Split View Router</h2>
+<p class="lede">Diagnostics for troubleshooting and bug reports.</p>
+
+<h3>Current state</h3>
+<div class="state" id="state">Loading…</div>
+
+<h3>Event log <span class="pill" id="log-count">0</span></h3>
+<div class="log" id="log"><span class="empty">Loading…</span></div>
+
+<div class="notice">
+  Diagnostics include the <b>titles</b> of currently paired tabs and recent action history.
+  URLs are reduced to their origin (e.g., <code>https://docs.google.com</code>), but tab titles are preserved.
+  Review the copied text before sharing publicly.
+</div>
+
+<div class="row">
+  <button id="copy" class="primary" type="button">Copy diagnostics</button>
+  <button id="clear" type="button">Clear log</button>
+  <button id="toggle-logging" type="button">Stop debugging</button>
+  <button id="refresh" type="button">Refresh</button>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="options.js"></script>
+</body>
+</html>

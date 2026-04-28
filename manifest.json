@@ -1,0 +1,70 @@
+{
+  "manifest_version": 2,
+  "name": "Split View Router",
+  "version": "1.1.0",
+  "description": "Route link clicks between paired tabs in Firefox split view. Multiple independent pairs supported — like Edge's split tab.",
+  "homepage_url": "https://github.com/neuralrift/split-view-router-firefox",
+  "developer": {
+    "name": "neuralrift",
+    "url": "https://github.com/neuralrift/split-view-router-firefox/issues"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "split-view-router@neuralrift",
+      "strict_min_version": "149.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "64": "icons/icon64.png",
+    "96": "icons/icon96.png",
+    "128": "icons/icon128.png",
+    "256": "icons/icon256.png",
+    "512": "icons/icon512.png"
+  },
+  "permissions": [
+    "tabs",
+    "storage",
+    "sessions",
+    "contextMenus",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["lib/util.js", "background.js"],
+    "persistent": false
+  },
+  "browser_action": {
+    "default_title": "Split View Router",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "64": "icons/icon64.png",
+      "96": "icons/icon96.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["lib/util.js", "content.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "commands": {
+    "toggle-mode": {
+      "description": "Toggle routing mode (Simple / Ctrl)"
+    }
+  }
+}
