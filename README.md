@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/neuralrift/split-view-router-firefox/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Firefox](https://img.shields.io/badge/Firefox-149%2B-orange.svg)](https://www.mozilla.org/firefox/)
+[![Firefox Add-on](https://img.shields.io/badge/Firefox-Add--on-orange.svg)](https://addons.mozilla.org/en-US/firefox/addon/split-view-router/)
 
 **Edge-style link routing for Firefox's built-in split tab view.**
 
@@ -36,7 +36,7 @@ Pair two tabs as a split, and clicks in the left tab automatically open in the r
 ## 🚀 Installation
 
 ### For Users
-* **Firefox Add-ons**: [Coming Soon (Pending AMO Review)](#)
+* **Firefox Add-ons**: [![Get the Add-on](https://blog.mozilla.org/addons/files/2015/11/get-the-addon-button.png)](https://addons.mozilla.org/en-US/firefox/addon/split-view-router/)
 * **Manual**: Download the latest [release ZIP](https://github.com/neuralrift/split-view-router-firefox/releases), extract, and load via `about:debugging`.
 
 ### For Developers
