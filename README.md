@@ -7,102 +7,139 @@
 
 Edge-style link routing for Firefox's built-in split tab view.
 
-Split View Router lets you pair two Firefox tabs, then route link clicks from the left tab into the right tab. Keep a search page, issue list, documentation index, or inbox anchored on the left while opening each result in the companion tab on the right.
+Split View Router lets you keep a source page on the left, such as search
+results, documentation, issues, inboxes, or dashboards, while opening selected
+links in the paired tab on the right.
 
 [![Split View Router in Firefox split view](screenshots/promo1.png)](https://addons.mozilla.org/en-US/firefox/addon/split-view-router/)
 
+## Quick Links
+
+- [Install](#install)
+- [How It Works](#how-it-works)
+- [Usage](#usage)
+- [Screenshots](#screenshots)
+- [Privacy and Permissions](#privacy-and-permissions)
+- [Compatibility](#compatibility)
+- [Troubleshooting](#troubleshooting)
+- [Development](#development)
+
 ## Install
 
-**Recommended: install from Mozilla Add-ons**
+### Mozilla Add-ons
 
-[Get Split View Router on AMO](https://addons.mozilla.org/en-US/firefox/addon/split-view-router/)
+Recommended installation:
 
-**Install the signed XPI from GitHub Releases**
+<a href="https://addons.mozilla.org/en-US/firefox/addon/split-view-router/">
+  <img src="https://blog.mozilla.org/addons/files/2015/11/get-the-addon.png" alt="Get the Add-on" width="172" height="60">
+</a>
 
-1. Download `split_view_router-1.1.0-signed.xpi` from the [v1.1.0 release](https://github.com/neuralrift/split-view-router-firefox/releases/tag/v1.1.0).
-2. Open the downloaded `.xpi` in Firefox, or drag it onto a Firefox window.
+### GitHub Release
+
+1. Download the signed `.xpi` from the [latest release](https://github.com/neuralrift/split-view-router-firefox/releases).
+2. Open the downloaded file in Firefox, or drag it into a Firefox window.
 3. Confirm the installation prompt.
 
-**Load manually for development**
+For local development setup, see [Development](#development).
 
-1. Clone this repository.
-2. Open Firefox and go to `about:debugging#/runtime/this-firefox`.
-3. Choose **Load Temporary Add-on...**.
-4. Select this repository's `manifest.json`.
+## How It Works
 
-Temporary installs are unsigned, development-only, and are removed when Firefox restarts.
-
-## Feature Highlights
+Split View Router creates a left/right pair between two Firefox tabs. Once
+paired, link clicks from the left tab can open in the right tab without losing
+your place in the source tab.
 
 | Capability | What it does |
 | :--- | :--- |
-| Left-to-right routing | Plain link clicks in the left paired tab can open in the right paired tab. |
+| Left-to-right routing | Opens links from the left paired tab in the right paired tab. |
 | Firefox split-view workflow | Designed for Firefox's native **Split Tab** experience. |
-| Multiple pairs | Run more than one independent left/right pair in the same Firefox session. |
-| Two routing modes | **Simple mode** routes normal clicks. **Ctrl mode** routes only Ctrl-click or Cmd-click. |
-| Per-pair pause | Pause or resume routing for a specific pair from the tab context menu. |
-| Global routing switch | Turn all routing on or off from the toolbar popup. |
-| Session restore | Pairs and pause state are rebuilt after Firefox restores a previous browser session. |
-| Popup and badge | See active pairs, current mode, and routing state from the toolbar. |
+| Multiple pairs | Runs more than one independent left/right pair in the same session. |
+| Two routing modes | Uses normal clicks in **Simple** mode or Ctrl/Cmd-clicks in **Ctrl** mode. |
+| Per-pair controls | Pauses, resumes, or removes individual pairs from the tab menu. |
+| Global routing switch | Turns routing on or off from the toolbar popup. |
+| Session restore | Rebuilds pairs and pause state after Firefox restores a session. |
+| Popup and badge | Shows active pairs, current mode, and routing state from the toolbar. |
 | `target="_blank"` support | Routes regular links, new-tab links, and supported `window.open()` flows. |
-| Diagnostics | Copy extension state and recent debug events from the add-on preferences page. |
-| Privacy-first | No analytics, no remote service, no account, and no data collection. |
-
-## Screenshots
-
-| Pair tabs | Manage routing | Use the tab menu |
-| :--- | :--- | :--- |
-| ![Pair selected tabs](screenshots/promo2.png) | ![Toolbar popup](screenshots/promo3.png) | ![Context menu actions](screenshots/promo4.png) |
+| Diagnostics | Copies extension state and recent debug events from the preferences page. |
+| Privacy-first | Uses no analytics, accounts, remote services, or data collection. |
 
 ## Usage
 
-1. Open two tabs you want to use as a split pair.
-2. Use Firefox's native **Split Tab** action to place them side by side.
-3. Select both tabs in the tab strip. In Firefox, use Ctrl-click on Windows/Linux or Cmd-click on macOS.
-4. Right-click one of the selected tabs and choose **Pair selected tabs as split**.
-5. Click links in the left tab. The routed destination opens in the right tab.
+1. Open two tabs.
+2. Place them side by side with Firefox's native **Split Tab** feature.
+3. Select both tabs in the tab strip:
+   - Windows/Linux: Ctrl-click
+   - macOS: Cmd-click
+4. Right-click either selected tab.
+5. Choose **Pair selected tabs as split**.
+6. Click links in the left tab to open them in the right tab.
 
 ### Routing Modes
 
 | Mode | Behavior |
 | :--- | :--- |
-| Simple | Normal left-click routes to the right tab. Ctrl-click or Cmd-click keeps Firefox's normal new-tab behavior. |
-| Ctrl | Ctrl-click or Cmd-click routes to the right tab. Normal left-click stays in the left tab. |
+| Simple | Normal left-click routes to the right tab. Ctrl/Cmd-click keeps Firefox's default behavior. |
+| Ctrl | Ctrl/Cmd-click routes to the right tab. Normal left-click stays in the left tab. |
 
-Change modes from the toolbar popup, or assign a shortcut in `about:addons` under **Manage Extension Shortcuts**.
+Change modes from the toolbar popup, or assign a shortcut in `about:addons`
+under **Manage Extension Shortcuts**.
 
-### Context Menu Actions
+### Tab Actions
 
-Right-click a tab to access the add-on actions:
+Right-click a tab to access Split View Router actions:
 
-- **Pair selected tabs as split** creates a left/right pair from exactly two highlighted tabs.
+- **Pair selected tabs as split** creates a left/right pair from exactly two selected tabs.
 - **Unpair this tab** removes the pair that contains the current tab.
 - **Unpair all** clears every pair.
-- **Pause routing** and **Resume routing** control routing for one pair without deleting it.
+- **Pause routing** temporarily stops routing for one pair.
+- **Resume routing** turns routing back on for one paused pair.
+
+## Screenshots
+
+| Pair tabs | Control routing | Use tab actions |
+| :--- | :--- | :--- |
+| ![Pair selected tabs](screenshots/promo2.png) | ![Toolbar popup showing routing controls](screenshots/promo3.png) | ![Tab context menu actions](screenshots/promo4.png) |
 
 ## Privacy and Permissions
 
-Split View Router runs locally inside Firefox and does not collect, transmit, sell, or share user data. See [PRIVACY.md](PRIVACY.md) for the full privacy statement.
+Split View Router runs locally inside Firefox.
+
+It does not collect analytics, create accounts, use remote services, transmit
+browsing data, sell data, or share user data. See [PRIVACY.md](PRIVACY.md) for
+the full privacy statement.
 
 | Permission | Why it is needed |
 | :--- | :--- |
-| `tabs` | Track paired tabs, update the right tab, and clean up pairs when tabs close. |
-| `storage` | Save routing mode, pair state, pause state, and local diagnostics. |
-| `sessions` | Restore pair metadata after Firefox restores a previous session. |
-| `contextMenus` | Add Pair, Unpair, Pause, and Resume actions to the tab context menu. |
-| `<all_urls>` | Intercept clicks on pages that are part of a user-created pair. |
+| `tabs` | Tracks paired tabs, updates the right tab, and cleans up pairs when tabs close. |
+| `storage` | Saves routing mode, pair state, pause state, and local diagnostics. |
+| `sessions` | Restores pair metadata after Firefox restores a previous session. |
+| `contextMenus` | Adds Pair, Unpair, Pause, and Resume actions to the tab context menu. |
+| `<all_urls>` | Intercepts clicks on pages that are part of a user-created pair. |
 
 ## Compatibility
 
 - Firefox 149 or newer is required by the signed add-on.
-- Firefox's native split tab feature must be available in the browser.
+- Firefox's native Split Tab feature must be available in the browser.
 - Internal Firefox pages such as `about:newtab`, `about:addons`, and `about:debugging` do not run content scripts, so routing is not available inside those pages.
 - Some strict Content Security Policy pages may block the `window.open()` override. Regular anchor links still route where Firefox allows the content script to run.
 
+## Troubleshooting
+
+Use the add-on preferences page to copy extension state and recent debug events
+when reporting an issue.
+
+For version history, see [CHANGELOG.md](CHANGELOG.md).
+
 ## Development
+
+Install dependencies:
 
 ```bash
 npm install
+```
+
+Run checks:
+
+```bash
 npm test
 npm run lint
 npm run build
@@ -112,11 +149,21 @@ Useful commands:
 
 | Command | Purpose |
 | :--- | :--- |
-| `npm test` | Run the Vitest unit suite. |
-| `npm run test:e2e` | Run the Playwright smoke test. |
-| `npm run lint` | Validate the extension with `web-ext lint`. |
-| `npm run build` | Create an unsigned package in `web-ext-artifacts/`. |
-| `npm run start` | Launch Firefox with the extension loaded by `web-ext`. |
+| `npm test` | Runs the Vitest unit suite. |
+| `npm run test:e2e` | Runs the Playwright smoke test. |
+| `npm run lint` | Validates the extension with `web-ext lint`. |
+| `npm run build` | Creates an unsigned package in `web-ext-artifacts/`. |
+| `npm run start` | Launches Firefox with the extension loaded by `web-ext`. |
+
+### Load Locally in Firefox
+
+1. Clone this repository.
+2. Open Firefox and go to `about:debugging#/runtime/this-firefox`.
+3. Choose **Load Temporary Add-on...**.
+4. Select this repository's `manifest.json`.
+
+Temporary installs are unsigned, development-only, and are removed when Firefox
+restarts.
 
 ## Release Notes
 
