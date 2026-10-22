@@ -1,23 +1,22 @@
 {
   "name": "split-view-router",
-  "version": "1.1.0",
-  "description": "Firefox add-on: route link clicks between paired tabs in Firefox split view.",
+  "version": "2.0.0",
+  "description": "Chrome extension: in a Chrome split view, open links from the left tab in the right tab.",
   "private": true,
   "license": "MIT",
-  "homepage": "https://github.com/neuralrift/split-view-router-firefox",
+  "homepage": "https://github.com/neuralrift/split-view-router-chrome",
   "repository": {
     "type": "git",
-    "url": "https://github.com/neuralrift/split-view-router-firefox.git"
+    "url": "https://github.com/neuralrift/split-view-router-chrome.git"
   },
   "bugs": {
-    "url": "https://github.com/neuralrift/split-view-router-firefox/issues"
+    "url": "https://github.com/neuralrift/split-view-router-chrome/issues"
   },
   "scripts": {
-    "lint": "web-ext lint",
-    "build": "web-ext build",
-    "start": "web-ext run",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:all": "vitest run && playwright test",
+    "build": "web-ext build --overwrite-dest"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",

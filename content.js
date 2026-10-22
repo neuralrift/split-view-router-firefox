@@ -1,150 +1,108 @@
-// content.js — intercepts link clicks and window.open in left split tabs
-(async () => {
-  const api = typeof browser !== "undefined" ? browser : chrome;
+// content.js — runs in every frame (all_frames) of http(s) pages, isolated world.
+// In the left tab of a split it turns link clicks into "open in the right tab".
+(() => {
+  const core = globalThis.SVRCore;
+  const alive = () => !!(globalThis.chrome && chrome.runtime && chrome.runtime.id);
+
+  // Skip a second copy (static injection plus the install-time injection).
+  if (globalThis.__svrRouter && globalThis.__svrRouter.alive()) return;
+  globalThis.__svrRouter = {alive};
 
   let mode = 'simple';
   let enabled = false;
-  let routeArmed = false;
-  let activeRouteUntil = 0;
-  let clearRouteTimer = 0;
-  
-  const SVR_TOKEN = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))));
+  let armedUntil = 0;
 
   const logEvent = (lvl, msg, data) => {
-    try { api.runtime.sendMessage({type: "logEvent", lvl, msg, data: data || null}).catch((e) => { console.error("[SVR] send log error:", e); }); } catch (e) { console.error("[SVR] log exception:", e); }
+    if (!alive()) return;
+    chrome.runtime.sendMessage({type: 'logEvent', lvl, msg, data: data || null}).catch(() => {});
   };
 
-  function syncPageState() {
+  function applyState(state) {
+    if (!state) return;
+    mode = state.mode === 'ctrl' ? 'ctrl' : 'simple';
+    enabled = !!state.enabled;
     const root = document.documentElement;
-    if (!root) return;
-    root.setAttribute('data-svr-enabled', String(enabled));
-    root.setAttribute('data-svr-mode', mode);
-  }
-
-  function clearRouteIntent() {
-    routeArmed = false;
-    activeRouteUntil = 0;
-    if (clearRouteTimer) {
-      clearTimeout(clearRouteTimer);
-      clearRouteTimer = 0;
+    if (root) {
+      root.setAttribute('data-svr-enabled', String(enabled));
+      root.setAttribute('data-svr-mode', mode);
     }
+    if (!enabled) disarm();
   }
 
   async function refreshState() {
-    try {
-      const state = await api.runtime.sendMessage({type: "getState"});
-      if (state) { mode = state.mode; enabled = state.enabled; }
-    } catch (e) { console.error(e);  }
-    syncPageState();
-    if (!enabled) clearRouteIntent();
+    if (!alive()) { enabled = false; return; }
+    try { applyState(await chrome.runtime.sendMessage({type: 'getState'})); }
+    catch (e) { /* worker restarting or extension reloaded */ }
   }
-  await refreshState();
 
-  // Re-fetch state whenever pairs or mode change in storage.
-  api.storage.onChanged.addListener((ch) => {
-    if (ch.pairs || ch.mode || ch.routing || ch.paused) refreshState();
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (msg && msg.type === 'svr:state') applyState(msg.state);
   });
 
-  const shouldRoute = (e) => {
-    if (!enabled || e.defaultPrevented) return false;
-    const mod = e.ctrlKey || e.metaKey || e.shiftKey || e.altKey;
-    return mode === 'simple' ? (!mod && e.button === 0) : (e.ctrlKey || e.metaKey);
-  };
-
-  const route = (url, e) => {
-    if (!url || !url.startsWith('http')) return;
-    if (e) { e.preventDefault(); e.stopPropagation(); }
-    api.runtime.sendMessage({type: "openInRight", url}).catch(() => {});
-  };
-
-  function armRouteIntent(e) {
-    if (!e.isTrusted || !shouldRoute(e)) {
-      clearRouteIntent();
-      return;
-    }
-
-    routeArmed = true;
-    activeRouteUntil = Date.now() + 400;
-
-    if (clearRouteTimer) clearTimeout(clearRouteTimer);
-    clearRouteTimer = setTimeout(clearRouteIntent, 450);
+  // window.open interception (main-world.js) only fires inside a short window
+  // after a trusted pointerdown that would have routed a click.
+  function arm() {
+    armedUntil = Date.now() + 400;
+    document.documentElement && document.documentElement.setAttribute('data-svr-armed-until', String(armedUntil));
+  }
+  function disarm() {
+    armedUntil = 0;
+    document.documentElement && document.documentElement.removeAttribute('data-svr-armed-until');
   }
 
-  document.addEventListener('pointerdown', (e) => {
-    armRouteIntent(e);
-  }, true);
-
-  document.addEventListener('click', (e) => {
-    const a = e.target.closest('a[href]');
-    if (!a || a.hasAttribute('download') || !enabled) return;
-    if (shouldRoute(e)) {
-      clearRouteIntent();
-      route(a.href, e);
-    } else {
-      clearRouteIntent();
-    }
-  }, true);
-
-  // Inject a page-world override of window.open so doc viewers and JS-driven popups can be routed.
-  // Only intercepts when a fresh route intent is armed; otherwise delegates to the native implementation.
-  // Note: pages with strict CSP (no inline scripts) will block this; clicks on <a> still work.
-  try {
-    const s = document.createElement('script');
-    s.textContent = `(() => {
-      const originalOpen = window.open;
-      const TOKEN = "${SVR_TOKEN}";
-
-      window.open = function(u, name, specs) {
-        try {
-          const root = document.documentElement;
-          const isEnabled = root.getAttribute('data-svr-enabled') === 'true';
-
-          if (isEnabled) {
-            window.postMessage({__svr: 1, u: String(u), t: TOKEN}, '*');
-            let closed = false;
-            setTimeout(() => { closed = true; }, 50);
-            return {
-              focus() {},
-              close() { closed = true; },
-              get closed() { return closed; }
-            };
-          }
-        } catch (e) { console.error(e); }
-
-        return originalOpen.apply(this, arguments);
-      };
-      window.__svr_installed = true;
-    })();`;
-    (document.documentElement || document.head).appendChild(s);
-    s.remove();
-
-    // CSP blocks script injection without necessarily throwing. Check for our marker.
-    if (!window.__svr_installed) {
-      throw new Error("Script execution blocked");
-    }
-    delete window.__svr_installed;
-  } catch (e) {
-    console.warn('[Split View Router] CSP blocked window.open override — only <a> clicks will be routed on this page');
-    logEvent("warn", "csp_blocked_window_open", {origin: originOf(location.href)});
-    try { api.runtime.sendMessage({type: "cspBlocked"}).catch(() => {}); } catch(err) { console.error("[SVR] send cspBlocked failed:", err); }
+  // Navigate the way the browser would have, used when routing fails after
+  // we already cancelled the click.
+  function navigateNormally(url, target) {
+    const t = (target || '').trim();
+    if (!t || t === '_self') location.assign(url);
+    else window.open(url, t, t === '_blank' ? 'noopener' : '');
   }
 
-  window.addEventListener('message', (e) => {
-    if (e.source !== window) return;
-    if (!e.data || !e.data.__svr) return;
-    if (e.data.t !== SVR_TOKEN) return; // Security validation
-    if (!enabled) return;
-    if (!routeArmed) return;
-    if (Date.now() > activeRouteUntil) {
-      clearRouteIntent();
-      logEvent("info", "window_open_dropped_stale", {origin: originOf(e.data.u)});
-      return;
+  async function routeOrFallback(url, target) {
+    let res = null;
+    try { res = await chrome.runtime.sendMessage({type: 'route', url}); }
+    catch (e) { res = null; }
+    if (!res || !res.routed) {
+      logEvent('warn', 'route_fallback', {reason: res ? res.reason : 'no_response', origin: core.originOf(url)});
+      navigateNormally(url, target);
     }
+  }
 
-    clearRouteIntent();
-    logEvent("info", "window_open_routed", {origin: originOf(e.data.u)});
-    route(e.data.u);
+  window.addEventListener('pointerdown', (e) => {
+    // Cheap re-check so a split made or dissolved a moment ago is known by click time.
+    refreshState();
+    if (e.isTrusted && enabled && alive() && core.clickMatchesMode(mode, e)) arm();
+    else disarm();
+  }, true);
+
+  // Capture phase on window runs before page handlers (ServiceNow list rows
+  // and Next Experience components attach their own click handlers).
+  window.addEventListener('click', (e) => {
+    if (!enabled || !e.isTrusted || e.defaultPrevented || !alive()) return;
+    if (!core.clickMatchesMode(mode, e)) return;
+    const a = core.findAnchor(e);
+    if (!a) return;
+    const url = core.routableUrl(a, location.href);
+    if (!url) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    disarm();
+    routeOrFallback(url, a.getAttribute('target'));
+  }, true);
+
+  // main-world.js reports window.open calls it swallowed.
+  window.addEventListener('svr:open', (e) => {
+    const url = typeof e.detail === 'string' ? e.detail : '';
+    if (!enabled || !url) return;
+    if (Date.now() > armedUntil) return;
+    disarm();
+    logEvent('info', 'window_open_routed', {origin: core.originOf(url)});
+    routeOrFallback(url, '_blank');
   });
 
-  window.addEventListener('blur', clearRouteIntent);
+  window.addEventListener('blur', disarm);
+  window.addEventListener('focus', refreshState);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshState(); });
+
+  refreshState();
 })();

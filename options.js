@@ -41,7 +41,7 @@ function renderState(d) {
   addKV('Mode', d.state.mode, d.state.mode === 'simple' ? 'on' : 'warn');
   addKV('Routing', d.state.routing ? 'On' : 'Off', d.state.routing ? 'on' : 'err');
   addKV('Debugging', d.state.logging ? 'On' : 'Off', d.state.logging ? 'on' : 'warn');
-  addKV('Pairs', String(d.state.pairs.length));
+  addKV('Splits', String(d.state.pairs.length));
 
   if (d.state.pairs.length) {
     const wrap = document.createElement('div');
@@ -109,7 +109,7 @@ function renderLog(entries) {
 
 async function refresh() {
   try {
-    const d = await browser.runtime.sendMessage({type: "getDiagnostics"});
+    const d = await chrome.runtime.sendMessage({type: "getDiagnostics"});
     if (!d) {
       $('state').textContent = 'Could not read diagnostics.';
       return;
@@ -141,7 +141,7 @@ function copyViaTextarea(text) {
 $('copy').addEventListener('click', async () => {
   let text;
   try {
-    const d = await browser.runtime.sendMessage({type: "getDiagnostics"});
+    const d = await chrome.runtime.sendMessage({type: "getDiagnostics"});
     text = JSON.stringify(d, null, 2);
   } catch (e) {
     showToast(`Failed to gather diagnostics: ${e.message || e}`);
@@ -161,7 +161,7 @@ $('copy').addEventListener('click', async () => {
 
 $('clear').addEventListener('click', async () => {
   try {
-    await browser.runtime.sendMessage({type: "clearLog"});
+    await chrome.runtime.sendMessage({type: "clearLog"});
     showToast('Log cleared');
     refresh();
   } catch (e) {
@@ -175,7 +175,7 @@ $('toggle-logging').addEventListener('click', async () => {
   const btn = $('toggle-logging');
   const wasEnabled = btn.dataset.enabled === 'true';
   try {
-    await browser.runtime.sendMessage({type: "setLogging", enabled: !wasEnabled});
+    await chrome.runtime.sendMessage({type: "setLogging", enabled: !wasEnabled});
     showToast(wasEnabled ? 'Debugging stopped' : 'Debugging started');
     refresh();
   } catch (e) {
@@ -183,8 +183,8 @@ $('toggle-logging').addEventListener('click', async () => {
   }
 });
 
-browser.storage.onChanged.addListener((ch) => {
-  if (ch.log || ch.pairs || ch.mode || ch.routing || ch.paused || ch.logging) refresh();
+chrome.storage.onChanged.addListener((ch) => {
+  if (ch.log || ch.mode || ch.routing || ch.pausedSplits || ch.logging) refresh();
 });
 
 refresh();

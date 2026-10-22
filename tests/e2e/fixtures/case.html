@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><title>Case | Workspace</title>
+<sn-record-link id="host"></sn-record-link>
+<script>
+  customElements.define('sn-record-link', class extends HTMLElement {
+    constructor() {
+      super();
+      const root = this.attachShadow({mode: 'open'});
+      root.innerHTML = '<now-link><a id="case-link" href="/target.html?from=case"><span>CS0001234</span></a></now-link>';
+    }
+  });
+</script>

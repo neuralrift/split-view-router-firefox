@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.0.0] — 2026-10-22
+
+Chrome MV3 port.
+
+### Changed
+- Pairs come from Chrome's native split view (`tabs.Tab.splitViewId`, Chrome 145+);
+  manual pairing, the tab context menus and the `sessions` restore are gone.
+- Content scripts run in all frames (ServiceNow `gsft_main` lists) and find links through
+  `event.composedPath()` (shadow DOM on workspace case pages).
+- `window.open` is wrapped by a main-world content script, so page CSP no longer blocks it,
+  and it only intercepts calls made right after a routable click.
+- Pause is per split view, from the popup, and lasts for the browser session.
+- When routing fails after the click was taken, the link navigates normally.
+- Same-page `#` links are not routed.
+
+### Added
+- Install-time injection into tabs that are already open.
+- Playwright e2e tests against Chromium with the unpacked extension.
+
 ## [1.1.0] — 2026-04-28
 
 ### Added

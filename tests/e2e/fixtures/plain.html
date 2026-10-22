@@ -1,0 +1,12 @@
+<!doctype html><meta charset="utf-8"><title>Plain</title>
+<p><a id="plain" href="/target.html?from=plain">plain link</a></p>
+<p><a id="blank" href="/target.html?from=blank" target="_blank">target=_blank link</a></p>
+<p><a id="hash" href="#">JS button link</a> <span id="hash-hits">0</span></p>
+<p><button id="opener" onclick="window.open('/target.html?from=window-open')">window.open</button></p>
+<script>
+  document.getElementById('hash').addEventListener('click', (e) => {
+    e.preventDefault();
+    const s = document.getElementById('hash-hits');
+    s.textContent = String(Number(s.textContent) + 1);
+  });
+</script>
